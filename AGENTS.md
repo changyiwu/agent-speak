@@ -80,7 +80,7 @@ agent-speak-skill/
 
 ## 全域技能同步狀態
 
-2026-10-20 重新同步（`88577a7`：讀音替換表＋整檔模式改用 `python -m edge_tts`）；四份副本各 5 個檔案，與專案來源的相對檔案清單及 SHA-256 完全一致，沒有額外檔案，且 `SKILL.md` 均無 UTF-8 BOM。
+2026-10-20 重新同步（`8f2f698`：讀音替換表自帶一份並合併其他 TTS repo 的同一份表）；四份副本各 6 個檔案（多了 `tts-lexicon.md`），與專案來源的相對檔案清單及 SHA-256 完全一致，沒有額外檔案，且 `SKILL.md` 均無 UTF-8 BOM。
 
 - Claude Code：`~\.claude\skills\speak`
 - Codex：`~\.agents\skills\speak`
