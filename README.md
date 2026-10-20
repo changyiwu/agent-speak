@@ -56,7 +56,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./speak/speak.ps1 -File ./講稿.t
 pwsh -NoProfile -ExecutionPolicy Bypass -File ./speak/speak.ps1 -File ./講稿.txt -Voice zh-TW-HsiaoYuNeural
 
 # 保留音檔（走整檔模式）
-pwsh -NoProfile -ExecutionPolicy Bypass -File ./speak/speak.ps1 -File ./講稿.txt -Out ./out/reply.mp3
+pwsh -NoProfile -ExecutionPolicy Bypass -File ./speak/speak.ps1 -File ./講稿.txt -Out ./output/reply.mp3
 ```
 
 `-Text "固定文字"` 仍可供人工測試；Agent 處理任意使用者內容時應使用 `-File`，避免 shell 字元被誤解析。

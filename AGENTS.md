@@ -77,6 +77,7 @@ agent-speak/
 - **讀音替換表自帶一份**：`speak/tts-lexicon.md`，跟技能一起安裝。這份表有**四份、內容逐位元組相同**（另外三份在 media-video-specs、media-short-film、media-voice-clone 的根目錄；四個 repo 都公開，各自單獨下載就要能用），**改表時四份一起改**，用 `python media-short-film/tools/tts_lexicon.py --check`／`--sync` 檢查與合併。`tts_lexicon.py` 會把找得到的另外三份一起讀（自帶那份優先）；不要 import 別的 repo 的程式，解析規則要跟表頭寫的一致。任何一份讀不到或壞掉都跳過，全部找不到必須安靜地照原文念（2026-10-20 前曾規定本技能不內建條目、只讀 media-short-film 那份，結果單獨安裝的人完全沒有替換，已廢止）
 - **呼叫 Edge-TTS 一律用 `python -m edge_tts`，不要直接跑 pip 產生的 `edge-tts.exe`**：它沒有簽章，Windows 智慧型應用程式控制開啟時會被封鎖（錯誤碼 4551），pwsh 7.6 擷取輸出時還會誤報成 `StandardOutputEncoding is only supported when standard output is redirected`——看到這個錯誤是被封鎖，不是編碼問題
 - winget 裝完會改 PATH，**同一個 shell session 要重新載入環境變數**才找得到 `pwsh`／`ffplay`
+- **產出一律放 `output/`**：本專案產生的檔案或資料夾（成品、匯出、報表、生成圖、渲染等）預設放專案根目錄的 `output/`，不另開 `outputs/`、`exports/`、`generated/`、`out/` 之類的資料夾，方便找；`output/` 不進 git。部署工具指定的建置目錄（`dist/`、`build/`）不在此限
 
 ## 全域技能同步狀態
 

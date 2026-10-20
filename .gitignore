@@ -9,3 +9,6 @@ handoff.md
 __pycache__/
 *.py[cod]
 *.mp3
+
+# 產出一律放 output/，不進 git
+output/
