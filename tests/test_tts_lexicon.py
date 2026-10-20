@@ -1,4 +1,4 @@
-"""tts_lexicon.py 的隔離測試；只用暫存資料夾，不讀本機真正的主表。"""
+"""tts_lexicon.py 的隔離測試；只用暫存資料夾，不讀本機真正的表。"""
 
 from __future__ import annotations
 
@@ -66,53 +66,96 @@ class LexiconTests(unittest.TestCase):
         out = tts_lexicon.speakable("奇數，十比十一少一，GPT-4，A|B", table)
         self.assertEqual(out, "基數，十比十一少了一，GPT four，A or B")
 
-    def test_env_var_wins(self) -> None:
-        env_table = write(self.root / "elsewhere" / "x.md")
-        skill = self.root / "agents" / "speak-skill" / "speak"
-        write(self.root / "agents" / "ai-video-workflow" / "tts-lexicon.md")
-        with mock.patch.dict(os.environ, {"TTS_LEXICON": str(env_table)}):
-            self.assertEqual(tts_lexicon.find(skill, self.root / "home"), str(env_table))
+    def table(self, *rows: tuple[str, str]) -> str:
+        return "| 原文 | 改寫 | 說明 |\n|---|---|---|\n" + "".join(f"| {a} | {b} | |\n" for a, b in rows)
 
-    def test_env_var_pointing_nowhere_means_no_table(self) -> None:
-        skill = self.root / "agents" / "speak-skill" / "speak"
-        write(self.root / "agents" / "ai-video-workflow" / "tts-lexicon.md")
+    def test_bundled_table_used_alone(self) -> None:
+        # 單獨下載本 repo、或只裝了技能：自帶那份就夠用
+        home = self.root / "home"
+        skill = home / ".claude" / "skills" / "speak"
+        own = write(skill / "tts-lexicon.md")
+        path, table, used = tts_lexicon.load(skill, home)
+        self.assertEqual(path, str(own))
+        self.assertEqual(used, [str(own)])
+        self.assertEqual(table["奇數"], "基數")
+
+    def test_merges_siblings_own_wins(self) -> None:
+        agents = self.root / "agents"
+        skill = agents / "agent-speak-skill" / "speak"
+        own = write(skill / "tts-lexicon.md", self.table(("奇數", "自帶版")))
+        aivw = write(agents / "ai-video-workflow" / "tts-lexicon.md", self.table(("奇數", "別份版"), ("只在別份", "x")))
+        path, table, used = tts_lexicon.load(skill, self.root / "home")
+        self.assertEqual(used, [str(aivw), str(own)])
+        self.assertEqual(table["奇數"], "自帶版")
+        self.assertEqual(table["只在別份"], "x")
+
+    def test_walks_up_from_skill_dir_for_all_siblings(self) -> None:
+        agents = self.root / "agents"
+        skill = agents / "agent-speak-skill" / "speak"
+        skill.mkdir(parents=True)
+        found = [write(agents / r / "tts-lexicon.md") for r in tts_lexicon.SIBLINGS]
+        self.assertEqual(tts_lexicon.find_all(skill, self.root / "home"), [str(f) for f in found])
+
+    def test_env_var_replaces_bundled_but_siblings_still_merge(self) -> None:
+        agents = self.root / "agents"
+        skill = agents / "agent-speak-skill" / "speak"
+        write(skill / "tts-lexicon.md", self.table(("奇數", "自帶版")))
+        aivw = write(agents / "ai-video-workflow" / "tts-lexicon.md", self.table(("只在別份", "x")))
+        env_table = write(self.root / "elsewhere" / "x.md", self.table(("奇數", "環境變數版")))
+        with mock.patch.dict(os.environ, {"TTS_LEXICON": str(env_table)}):
+            path, table, used = tts_lexicon.load(skill, self.root / "home")
+        self.assertEqual(used, [str(aivw), str(env_table)])
+        self.assertEqual(table["奇數"], "環境變數版")
+        self.assertEqual(path, str(env_table))
+
+    def test_env_var_pointing_nowhere_and_no_siblings_means_no_table(self) -> None:
+        skill = self.root / "agents" / "agent-speak-skill" / "speak"
+        write(skill / "tts-lexicon.md")
         with mock.patch.dict(os.environ, {"TTS_LEXICON": str(self.root / "missing.md")}):
             self.assertIsNone(tts_lexicon.find(skill, self.root / "home"))
 
-    def test_walks_up_from_skill_dir(self) -> None:
-        master = write(self.root / "agents" / "ai-video-workflow" / "tts-lexicon.md")
-        skill = self.root / "agents" / "agent-speak-skill" / "speak"
-        skill.mkdir(parents=True)
-        self.assertEqual(tts_lexicon.find(skill, self.root / "home"), str(master))
-
     def test_google_drive_default_under_home(self) -> None:
+        # 裝成全域技能時往上找不到，靠雲端硬碟位置找另外三份
         home = self.root / "home"
         skill = home / ".claude" / "skills" / "speak"
-        master = write(home / "我的雲端硬碟" / "agents" / "ai-video-workflow" / "tts-lexicon.md")
-        self.assertEqual(tts_lexicon.find(skill, home), str(master))
+        own = write(skill / "tts-lexicon.md")
+        aivw = write(home / "我的雲端硬碟" / "agents" / "ai-video-workflow" / "tts-lexicon.md")
+        self.assertEqual(tts_lexicon.find_all(skill, home), [str(aivw), str(own)])
 
     def test_macos_cloudstorage_default(self) -> None:
         home = self.root / "home"
         skill = home / ".claude" / "skills" / "speak"
-        master = write(
+        avs = write(
             home / "Library" / "CloudStorage" / "GoogleDrive-someone@example.com"
-            / "My Drive" / "agents" / "ai-video-workflow" / "tts-lexicon.md"
+            / "My Drive" / "agents" / "agent-video-specs" / "tts-lexicon.md"
         )
         with mock.patch.object(sys, "platform", "darwin"):
-            self.assertEqual(tts_lexicon.find(skill, home), str(master))
+            self.assertEqual(tts_lexicon.find(skill, home), str(avs))
 
     def test_not_found_keeps_text(self) -> None:
         home = self.root / "home"
-        path, table = tts_lexicon.load(home / ".claude" / "skills" / "speak", home)
+        path, table, used = tts_lexicon.load(home / ".claude" / "skills" / "speak", home)
         self.assertIsNone(path)
-        self.assertEqual(table, {})
+        self.assertEqual((table, used), ({}, []))
         self.assertEqual(tts_lexicon.speakable("奇數", table), "奇數")
 
-    def test_unreadable_table_is_ignored(self) -> None:
+    def test_unreadable_table_is_skipped_others_still_used(self) -> None:
+        agents = self.root / "agents"
+        skill = agents / "agent-speak-skill" / "speak"
+        bad = skill / "tts-lexicon.md"
+        bad.parent.mkdir(parents=True)
+        bad.write_bytes(b"\xff\xfe\x00broken")
+        aivw = write(agents / "ai-video-workflow" / "tts-lexicon.md")
+        path, table, used = tts_lexicon.load(skill, self.root / "home")
+        self.assertEqual(used, [str(aivw)])
+        self.assertEqual(table["奇數"], "基數")
+
+    def test_unreadable_only_table_means_no_table(self) -> None:
         bad = self.root / "bad.md"
         bad.write_bytes(b"\xff\xfe\x00broken")
+        skill = self.root / "lonely" / "speak"
         with mock.patch.dict(os.environ, {"TTS_LEXICON": str(bad)}):
-            path, table = tts_lexicon.load()
+            path, table, used = tts_lexicon.load(skill, self.root / "home")
         self.assertIsNone(path)
         self.assertEqual(table, {})
 

@@ -11,7 +11,7 @@ Voice-reply skill for AI agents (Claude Code / Codex / OpenCode / Antigravity) �
 - 🪟 **行內無視窗**：ffplay/mpv 管道播放，不會跳出任何播放器視窗
 - 🛡️ **三層備援**：串流 → 整檔（WPF MediaPlayer／WMPlayer COM）→ 離線 Windows SAPI，斷網也出得了聲
 - 🗣️ 預設台灣中文小陳女聲 `zh-TW-HsiaoChenNeural`，一個參數換任何 Edge-TTS 聲音
-- 📖 **讀音替換表**：送進 Edge-TTS 前套共用的 `tts-lexicon.md`（奇數 → 基數、GPT-4 → GPT four），找不到表就照原文念
+- 📖 **讀音替換表**：送進 Edge-TTS 前套技能自帶的 `tts-lexicon.md`（奇數 → 基數、GPT-4 → GPT four），同層其他 TTS repo 的同一份表也會一起讀；找不到表就照原文念
 - 🤝 **四個 Agent 通用**：同一份技能資料夾，Claude Code、Codex、OpenCode、Antigravity 都能用
 
 ## 需求
@@ -74,15 +74,14 @@ Edge-TTS 不能用 SSML 指定讀音，多音字與英文詞念錯只能改字�
 | GPT-4 | `GPT four` | 英文型號用英文念 |
 ```
 
-只讀表頭是「原文｜改寫」的表格；內容有 `|` 寫成 `\|`，反引號包住的格子會去掉反引號（用來標出前後空白）；長的原文先換，一次掃完不重複替換。本 repo 不內建條目，表與其他 TTS 專案共用；離線備援（SAPI／`say`）是別的引擎，照原文念。
+只讀表頭是「原文｜改寫」的表格；內容有 `|` 寫成 `\|`，反引號包住的格子會去掉反引號（用來標出前後空白）；長的原文先換，一次掃完不重複替換。技能**自帶一份** `speak/tts-lexicon.md`，安裝時跟著複製，單獨使用就有完整條目。這份表在 [agent-video-specs](https://github.com/changyiwu/agent-video-specs)、[ai-video-workflow](https://github.com/changyiwu/ai-video-workflow)、[voxcpm2-voice-cloner](https://github.com/changyiwu/voxcpm2-voice-cloner) 也各有一份、內容相同；找得到就一起讀，同一個原文以自帶那份為準。離線備援（SAPI／`say`）是別的引擎，照原文念。
 
-找表順序（找到第一份就停，都找不到就照原文念）：
+找表順序（遠的在前、近的覆蓋遠的；任何一份讀不到都跳過，全部找不到就照原文念）：
 
-1. 環境變數 `TTS_LEXICON`（有設就只用它）
-2. 從技能資料夾往上，每一層找 `ai-video-workflow/tts-lexicon.md`（從 repo 執行時適用）
-3. 家目錄底下的雲端硬碟：`~/我的雲端硬碟`、`~/My Drive`、`~/Google Drive/(我的雲端硬碟|My Drive)`、macOS 的 `~/Library/CloudStorage/GoogleDrive-*/(我的雲端硬碟|My Drive)`，底下的 `agents/ai-video-workflow/tts-lexicon.md`
+1. 另外三份：從技能資料夾往上，每一層找 `<repo>/tts-lexicon.md`（從 repo 執行時適用）；找不到再看家目錄底下的雲端硬碟：`~/我的雲端硬碟`、`~/My Drive`、`~/Google Drive/(我的雲端硬碟|My Drive)`、macOS 的 `~/Library/CloudStorage/GoogleDrive-*/(我的雲端硬碟|My Drive)`，底下的 `agents/<repo>/tts-lexicon.md`
+2. 自帶的 `speak/tts-lexicon.md`（設了環境變數 `TTS_LEXICON` 就改讀它指的表）
 
-技能平常從全域技能目錄執行，往上找不到，所以靠第 3 步；雲端硬碟掛成磁碟代號或放在別處時設 `TTS_LEXICON`。確認用了哪份表：
+技能平常從全域技能目錄執行，自帶那份一定讀得到；另外三份只是補充。確認用了哪幾份表：
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File ./speak/speak.ps1 -Check   # 看 LEXICON= 一行

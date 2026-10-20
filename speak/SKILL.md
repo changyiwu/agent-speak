@@ -35,12 +35,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File "<本技能資料夾>/speak.ps1" -
 
 Edge-TTS 不能用 SSML 指定讀音，念錯只能改字。串流與整檔兩層送進 Edge-TTS 前，會先套共用的讀音替換表 `tts-lexicon.md`（例：奇數 → 基數、十一少一 → 十一少了一、GPT-4 → GPT four）；講稿照正確用字寫，不必自己改字。第 3 層離線備援是別的引擎，照原文念。
 
-找表順序（找到第一份就停；都找不到就照原文念，不報錯、不拖慢）：
-1. 環境變數 `TTS_LEXICON`（有設就只用它）
-2. 從本技能資料夾往上，每一層找 `ai-video-workflow/tts-lexicon.md`
-3. 家目錄底下的雲端硬碟：`~/我的雲端硬碟`、`~/My Drive`、`~/Google Drive/(我的雲端硬碟|My Drive)`、macOS 的 `~/Library/CloudStorage/GoogleDrive-*/(我的雲端硬碟|My Drive)`，底下的 `agents/ai-video-workflow/tts-lexicon.md`
+本技能**自帶一份**表（`tts-lexicon.md`，跟本檔放在一起），單獨使用就有完整條目；同一份表在 agent-video-specs、ai-video-workflow、voxcpm2-voice-cloner 也各有一份，找得到就一起讀（自帶那份優先）。任何一份讀不到都跳過，全部找不到就照原文念，不報錯、不拖慢。
 
-`-Check` 的 `LEXICON=` 一行會顯示用了哪份表（`none`＝沒找到）；設 `SPEAK_DEBUG=1` 時串流播放的結果也會帶出用了哪份表。雲端硬碟掛成磁碟代號（例如 Windows 串流模式的 `G:`）或放在其他位置時，設 `TTS_LEXICON` 指向它。要新增讀音請改主表，不要改本技能。
+找另外三份的地方：從本技能資料夾往上每一層的 `<repo>/tts-lexicon.md`，再看家目錄底下的雲端硬碟（`~/我的雲端硬碟`、`~/My Drive`、`~/Google Drive/(我的雲端硬碟|My Drive)`、macOS 的 `~/Library/CloudStorage/GoogleDrive-*/(我的雲端硬碟|My Drive)`）的 `agents/<repo>/tts-lexicon.md`。設了環境變數 `TTS_LEXICON` 時，改讀它指的表來取代自帶那份。
+
+`-Check` 的 `LEXICON=` 一行會顯示最近的那份表與合併後的條數（`none`＝一份都沒找到）；設 `SPEAK_DEBUG=1` 時串流播放的結果也會帶出用了哪幾份表。要新增讀音，四份一起改（見表的開頭），不要只改本技能這份。
 
 ## 執行步驟
 

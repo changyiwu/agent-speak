@@ -33,11 +33,20 @@ $functions = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.
 foreach ($name in "Get-PythonCommand", "Invoke-Lexicon", "Get-SpeakableText", "Test-EdgeModule", "Get-EdgeFileCommand") {
   . ([scriptblock]::Create(($functions | Where-Object Name -eq $name).Extent.Text))
 }
-$LexiconScript = Join-Path $ProjectRoot "speak/tts_lexicon.py"
 $py = Get-PythonCommand
 $tmpDir = Join-Path ([IO.Path]::GetTempPath()) ("speak_test_{0}" -f [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Force $tmpDir | Out-Null
+# 只讀測試給的表：把 tts_lexicon.py 複製到暫存資料夾（往上找不到另外三份同內容的表），
+# 家目錄也暫時指到暫存資料夾（找不到雲端硬碟裡的那幾份）
+$isoSkill = Join-Path $tmpDir "skill"
+New-Item -ItemType Directory -Force $isoSkill | Out-Null
+Copy-Item -LiteralPath (Join-Path $ProjectRoot "speak/tts_lexicon.py") -Destination $isoSkill
+$LexiconScript = Join-Path $isoSkill "tts_lexicon.py"
 $savedLexicon = $env:TTS_LEXICON
+$savedUserProfile = $env:USERPROFILE
+$savedHome = $env:HOME
+$env:USERPROFILE = $tmpDir
+$env:HOME = $tmpDir
 try {
   $lexicon = Join-Path $tmpDir "tts-lexicon.md"
   [IO.File]::WriteAllText($lexicon, "| 原文 | 改寫 | 說明 |`n|---|---|---|`n| 奇數 | 基數 | |`n| GPT-4 | ``GPT four`` | |`n", [Text.UTF8Encoding]::new($false))
@@ -67,6 +76,8 @@ try {
   } finally { $env:PATH = $savedPath }
 } finally {
   $env:TTS_LEXICON = $savedLexicon
+  $env:USERPROFILE = $savedUserProfile
+  $env:HOME = $savedHome
   Remove-Item -LiteralPath $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
 }
 

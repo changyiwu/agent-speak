@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import importlib.util
 import io
 import os
 import runpy
@@ -87,13 +88,16 @@ class SpeakStreamTests(unittest.TestCase):
                 return "mock-mpv"
             return None
 
-        # 讀音替換表一律指向測試給的檔（沒給就指向不存在的檔），不受本機主表影響
-        sys.modules.pop("tts_lexicon", None)
+        # 讀音替換表一律指向測試給的檔（沒給就指向不存在的檔），不讀本機另外三份同內容的表
+        spec = importlib.util.spec_from_file_location("tts_lexicon", SCRIPT.parent / "tts_lexicon.py")
+        lexicon_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(lexicon_module)
+        lexicon_module.SIBLINGS = ()
         env = {"TTS_LEXICON": lexicon or os.path.join(tempfile.gettempdir(), "no-such-lexicon.md")}
         self.edge_module = edge_module
         with (
             mock.patch.dict(os.environ, env),
-            mock.patch.dict(sys.modules, {"edge_tts": edge_module}),
+            mock.patch.dict(sys.modules, {"edge_tts": edge_module, "tts_lexicon": lexicon_module}),
             mock.patch("shutil.which", side_effect=which),
             mock.patch("subprocess.Popen", return_value=process),
             mock.patch.object(sys, "argv", [str(SCRIPT), text]),
