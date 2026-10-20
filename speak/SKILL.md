@@ -22,19 +22,30 @@ description: 快速語音回覆技能。當使用者說「唸出來」「用語�
 
 - **必須用 PowerShell 7（`pwsh`）執行，不可退回 Windows PowerShell 5.1（`powershell`）**：`speak.ps1` 是 UTF-8 無 BOM，5.1 會用系統 ANSI 編碼去解，中文字串變亂碼、引號被吃掉，整份腳本在 **parse 階段就失敗**（`Unexpected token ')'`、`The string is missing the terminator`），連 `-Check` 都跑不到。看到這類語法錯誤是用錯直譯器，不是腳本壞掉——先確認 `pwsh` 是否存在，沒有就請使用者安裝 PowerShell 7，不要改用 `powershell` 硬跑。
 - **macOS**：先 `brew install --cask powershell`。第 2、3 層用的 `afplay` 與 `say` 都是系統內建，不必另外安裝。
-- 串流模式另需 Python 3 ＋ `edge_tts` 模組 ＋ `ffplay` 或 `mpv`；整檔模式需 `edge-tts` CLI。兩條路都不通才退到作業系統內建語音（可離線但機器感重）。
+- 串流模式另需 Python 3 ＋ `edge_tts` 模組 ＋ `ffplay` 或 `mpv`；整檔模式優先用同一個 Python 跑 `python -m edge_tts`，沒有該模組才改用 `edge-tts` 指令（pip 產生的 `edge-tts.exe` 沒有簽章，Windows 智慧型應用程式控制開啟時會被封鎖，所以不靠它）。兩條路都不通、或整檔模式中途出任何錯，都會退到作業系統內建語音（可離線但機器感重）。
 - 換到新電腦第一次使用前，先跑一次不播放聲音的環境檢查：
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File "<本技能資料夾>/speak.ps1" -Check
 ```
 
-輸出三個旗標 `STREAM_READY`／`FILE_READY`／`OFFLINE_READY`；只有 `OFFLINE_READY=True` 代表 Edge-TTS 兩條路都斷，要先補依賴再用。（`OFFLINE_READY` 在 Windows 量的是 SAPI、在 macOS 量的是 `say`。）
+輸出三個旗標 `STREAM_READY`／`FILE_READY`／`OFFLINE_READY` 與讀音替換表位置 `LEXICON`；只有 `OFFLINE_READY=True` 代表 Edge-TTS 兩條路都斷，要先補依賴再用。（`OFFLINE_READY` 在 Windows 量的是 SAPI、在 macOS 量的是 `say`。）
+
+## 讀音替換表（多音字、英文詞）
+
+Edge-TTS 不能用 SSML 指定讀音，念錯只能改字。串流與整檔兩層送進 Edge-TTS 前，會先套共用的讀音替換表 `tts-lexicon.md`（例：奇數 → 基數、十一少一 → 十一少了一、GPT-4 → GPT four）；講稿照正確用字寫，不必自己改字。第 3 層離線備援是別的引擎，照原文念。
+
+找表順序（找到第一份就停；都找不到就照原文念，不報錯、不拖慢）：
+1. 環境變數 `TTS_LEXICON`（有設就只用它）
+2. 從本技能資料夾往上，每一層找 `ai-video-workflow/tts-lexicon.md`
+3. 家目錄底下的雲端硬碟：`~/我的雲端硬碟`、`~/My Drive`、`~/Google Drive/(我的雲端硬碟|My Drive)`、macOS 的 `~/Library/CloudStorage/GoogleDrive-*/(我的雲端硬碟|My Drive)`，底下的 `agents/ai-video-workflow/tts-lexicon.md`
+
+`-Check` 的 `LEXICON=` 一行會顯示用了哪份表（`none`＝沒找到）；設 `SPEAK_DEBUG=1` 時串流播放的結果也會帶出用了哪份表。雲端硬碟掛成磁碟代號（例如 Windows 串流模式的 `G:`）或放在其他位置時，設 `TTS_LEXICON` 指向它。要新增讀音請改主表，不要改本技能。
 
 ## 執行步驟
 
 ### 1. 撰寫講稿
-- 口語化、精簡（100–250 字），數字用中文（「五十頁」不要「50頁」）
+- 口語化、精簡（100–250 字），數字用中文（「五十頁」不要「50頁」）；多音字、英文型號照正確用字寫，讀音替換表會處理
 - 只講結論與下一步，細節留在文字回覆
 
 ### 2. 安全準備講稿檔

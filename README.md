@@ -11,6 +11,7 @@ Voice-reply skill for AI agents (Claude Code / Codex / OpenCode / Antigravity) �
 - 🪟 **行內無視窗**：ffplay/mpv 管道播放，不會跳出任何播放器視窗
 - 🛡️ **三層備援**：串流 → 整檔（WPF MediaPlayer／WMPlayer COM）→ 離線 Windows SAPI，斷網也出得了聲
 - 🗣️ 預設台灣中文小陳女聲 `zh-TW-HsiaoChenNeural`，一個參數換任何 Edge-TTS 聲音
+- 📖 **讀音替換表**：送進 Edge-TTS 前套共用的 `tts-lexicon.md`（奇數 → 基數、GPT-4 → GPT four），找不到表就照原文念
 - 🤝 **四個 Agent 通用**：同一份技能資料夾，Claude Code、Codex、OpenCode、Antigravity 都能用
 
 ## 需求
@@ -19,7 +20,7 @@ Voice-reply skill for AI agents (Claude Code / Codex / OpenCode / Antigravity) �
 |------|------|
 | Windows 10/11 | 播放備援用到 WPF／SAPI（核心生成跨平台，播放層目前為 Windows） |
 | PowerShell 7（pwsh） | `winget install Microsoft.PowerShell` |
-| Python 3.8+ ＋ edge-tts | `pip install edge-tts` |
+| Python 3.8+ ＋ edge-tts | `pip install edge-tts`（串流與整檔都直接跑 Python 模組，不靠 `edge-tts.exe`） |
 | ffmpeg（含 ffplay）或 mpv | 串流播放用；沒有也能動（自動退到整檔模式）。`winget install Gyan.FFmpeg` |
 
 PowerShell 7 是啟動本 Skill 的必要條件；Windows SAPI 只負責執行後的離線語音備援，不能取代 `pwsh`。
@@ -62,6 +63,34 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./speak/speak.ps1 -File ./講稿.t
 
 可用聲音清單：`edge-tts --list-voices`
 
+## 讀音替換表
+
+Edge-TTS 不能用 SSML 指定讀音，多音字與英文詞念錯只能改字。`speak/tts_lexicon.py` 在送進 Edge-TTS 前（串流與整檔兩層）套一份 Markdown 替換表：
+
+```markdown
+| 原文 | 改寫 | 說明 |
+|---|---|---|
+| 奇數 | 基數 | 奇讀 jī |
+| GPT-4 | `GPT four` | 英文型號用英文念 |
+```
+
+只讀表頭是「原文｜改寫」的表格；內容有 `|` 寫成 `\|`，反引號包住的格子會去掉反引號（用來標出前後空白）；長的原文先換，一次掃完不重複替換。本 repo 不內建條目，表與其他 TTS 專案共用；離線備援（SAPI／`say`）是別的引擎，照原文念。
+
+找表順序（找到第一份就停，都找不到就照原文念）：
+
+1. 環境變數 `TTS_LEXICON`（有設就只用它）
+2. 從技能資料夾往上，每一層找 `ai-video-workflow/tts-lexicon.md`（從 repo 執行時適用）
+3. 家目錄底下的雲端硬碟：`~/我的雲端硬碟`、`~/My Drive`、`~/Google Drive/(我的雲端硬碟|My Drive)`、macOS 的 `~/Library/CloudStorage/GoogleDrive-*/(我的雲端硬碟|My Drive)`，底下的 `agents/ai-video-workflow/tts-lexicon.md`
+
+技能平常從全域技能目錄執行，往上找不到，所以靠第 3 步；雲端硬碟掛成磁碟代號或放在別處時設 `TTS_LEXICON`。確認用了哪份表：
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File ./speak/speak.ps1 -Check   # 看 LEXICON= 一行
+python ./speak/tts_lexicon.py "奇數加一，GPT-4"                           # 試替換結果
+```
+
+串流播放時設 `SPEAK_DEBUG=1` 也會在結果帶出用了哪份表。表每次執行只讀一次，載入約數毫秒，不影響首聲。
+
 ## 運作原理
 
 ```
@@ -77,6 +106,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./speak/speak.ps1 -File ./講稿.t
 - `speak/SKILL.md` — 技能說明（Agent 讀這份決定何時觸發、怎麼呼叫）
 - `speak/speak.ps1` — 主腳本（模式選擇＋備援鏈）
 - `speak/speak_stream.py` — Edge-TTS 串流播放器
+- `speak/tts_lexicon.py` — 讀音替換表載入與替換
 
 ## 注意
 
@@ -90,7 +120,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./speak/speak.ps1 -File ./講稿.t
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File ./tests/test_speak.ps1
-python -m unittest ./tests/test_speak_stream.py
+python -m unittest ./tests/test_speak_stream.py ./tests/test_tts_lexicon.py
 ```
 
 ## License

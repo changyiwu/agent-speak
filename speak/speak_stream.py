@@ -6,12 +6,21 @@
   python speak_stream.py "文字" [voice]
 需要 mpv 或 ffplay 其中之一（管道播放器，皆無視窗）。
 找不到播放器時以 exit code 3 結束，讓外層 speak.ps1 退回整檔模式。
+送進 Edge-TTS 前先套讀音替換表（見 tts_lexicon.py）；找不到表就照原文念。
 """
 import asyncio
+import os
 import shutil
 import subprocess
 import sys
 import time
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from tts_lexicon import speakable
+except Exception:                                        # 副本缺檔或壞掉時照原文念
+    def speakable(text):
+        return text
 
 
 async def main() -> None:
@@ -22,6 +31,7 @@ async def main() -> None:
     text = text.strip()
     if not text:
         sys.exit(2)
+    text = speakable(text)
     voice = sys.argv[2] if len(sys.argv) > 2 else "zh-TW-HsiaoChenNeural"
 
     import edge_tts

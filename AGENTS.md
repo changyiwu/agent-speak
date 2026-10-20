@@ -28,7 +28,8 @@ agent-speak-skill/
 │   ├── agents/            # Codex UI metadata
 │   ├── SKILL.md           # 觸發條件與 Agent 執行流程
 │   ├── speak.ps1          # Windows 主控、播放與備援腳本
-│   └── speak_stream.py    # Edge-TTS 串流播放器
+│   ├── speak_stream.py    # Edge-TTS 串流播放器
+│   └── tts_lexicon.py     # 讀音替換表載入（主表在 ai-video-workflow/tts-lexicon.md）
 ├── tests/                 # 不連網、不播放聲音的隔離測試
 ├── AGENTS.md              # 跨 Agent 專案藍圖
 ├── handoff.md             # 跨工作階段交接（本機檔，git 不追蹤，靠 GDrive 同步）
@@ -72,6 +73,8 @@ agent-speak-skill/
 - **`speak.ps1` 必須用 `pwsh` 執行**。它是 UTF-8 無 BOM，Windows PowerShell 5.1 會以 ANSI 解讀，中文變亂碼、引號被吃掉，在 **parse 階段就失敗**（`Unexpected token ')'`、`The string is missing the terminator`），連 `-Check` 都跑不到。**看到這種語法錯誤是用錯直譯器，不是腳本壞掉**
 - **`pwsh` 可能是 winget 的 MSIX 版**，解析到 `AppData\Local\Microsoft\WindowsApps\pwsh.exe`，`C:\Program Files\PowerShell` 並不存在。一般沙箱看不到 `WindowsApps`，會**誤報 pwsh 未安裝**——那是假性缺少，不要重裝，實體在 `C:\Program Files\WindowsApps\Microsoft.PowerShell_*`
 - **不要把使用者提供的講稿直接插入 shell 命令字串**，一律寫成 UTF-8 暫存文字檔再用 `-File` 傳入
+- **讀音替換表不在本 repo**：主表是 `ai-video-workflow/tts-lexicon.md`（與其他 TTS 專案共用），新增讀音改主表，不要在 `speak/` 內建條目，也不要 import 別的 repo 的程式；`tts_lexicon.py` 的解析規則要跟主表檔頭寫的一致。找不到表必須安靜地照原文念
+- **呼叫 Edge-TTS 一律用 `python -m edge_tts`，不要直接跑 pip 產生的 `edge-tts.exe`**：它沒有簽章，Windows 智慧型應用程式控制開啟時會被封鎖（錯誤碼 4551），pwsh 7.6 擷取輸出時還會誤報成 `StandardOutputEncoding is only supported when standard output is redirected`——看到這個錯誤是被封鎖，不是編碼問題
 - winget 裝完會改 PATH，**同一個 shell session 要重新載入環境變數**才找得到 `pwsh`／`ffplay`
 
 ## 全域技能同步狀態

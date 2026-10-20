@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import contextlib
 import io
+import os
 import runpy
+import tempfile
 import sys
 import types
 import unittest
@@ -47,12 +49,14 @@ class FakeProcess:
 def fake_edge_tts(chunks: list[dict[str, object]]) -> types.ModuleType:
     module = types.ModuleType("edge_tts")
     module.last_voice = None
+    module.last_text = None
 
     class Communicate:
         def __init__(self, text: str, voice: str) -> None:
             self.text = text
             self.voice = voice
             module.last_voice = voice
+            module.last_text = text
 
         async def stream(self):
             for chunk in chunks:
@@ -70,6 +74,8 @@ class SpeakStreamTests(unittest.TestCase):
         player_code: int = 0,
         fail_write: bool = False,
         player_present: bool = True,
+        text: str = "測試文字",
+        lexicon: str | None = None,
     ) -> tuple[int, str, str, str | None]:
         process = FakeProcess(return_code=player_code, fail_write=fail_write)
         edge_module = fake_edge_tts(chunks)
@@ -81,11 +87,16 @@ class SpeakStreamTests(unittest.TestCase):
                 return "mock-mpv"
             return None
 
+        # 讀音替換表一律指向測試給的檔（沒給就指向不存在的檔），不受本機主表影響
+        sys.modules.pop("tts_lexicon", None)
+        env = {"TTS_LEXICON": lexicon or os.path.join(tempfile.gettempdir(), "no-such-lexicon.md")}
+        self.edge_module = edge_module
         with (
+            mock.patch.dict(os.environ, env),
             mock.patch.dict(sys.modules, {"edge_tts": edge_module}),
             mock.patch("shutil.which", side_effect=which),
             mock.patch("subprocess.Popen", return_value=process),
-            mock.patch.object(sys, "argv", [str(SCRIPT), "測試文字"]),
+            mock.patch.object(sys, "argv", [str(SCRIPT), text]),
             contextlib.redirect_stdout(stdout),
             contextlib.redirect_stderr(stderr),
         ):
@@ -108,6 +119,29 @@ class SpeakStreamTests(unittest.TestCase):
         self.assertEqual(voice, "zh-TW-HsiaoChenNeural")
         self.assertIn("first_audio_chunk_s=", stdout)
         self.assertIn("total_s=", stdout)
+
+    def test_lexicon_rewrites_text_sent_to_edge_tts(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "tts-lexicon.md")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(
+                    "| 原文 | 改寫 | 說明 |\n|---|---|---|\n"
+                    "| 奇數 | 基數 | |\n| GPT-4 | `GPT four` | |\n"
+                )
+            code, _, _, _ = self.run_stream(
+                chunks=[{"type": "audio", "data": b"audio"}],
+                text="奇數和 GPT-4",
+                lexicon=path,
+            )
+        self.assertEqual(code, 0)
+        self.assertEqual(self.edge_module.last_text, "基數和 GPT four")
+
+    def test_missing_lexicon_keeps_text(self) -> None:
+        code, _, _, _ = self.run_stream(
+            chunks=[{"type": "audio", "data": b"audio"}], text="奇數和 GPT-4"
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(self.edge_module.last_text, "奇數和 GPT-4")
 
     def test_missing_player_returns_three(self) -> None:
         code, _, _, _ = self.run_stream(chunks=[], player_present=False)
