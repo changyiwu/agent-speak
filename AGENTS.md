@@ -79,7 +79,7 @@ agent-speak-skill/
 
 ## 全域技能同步狀態
 
-2026-08-03 重新同步（`SKILL.md` 新增「環境需求」）；四份副本各 4 個檔案，與專案來源的相對檔案清單及 SHA-256 完全一致，沒有額外檔案，且 `SKILL.md` 均無 UTF-8 BOM。
+2026-10-20 重新同步（`88577a7`：讀音替換表＋整檔模式改用 `python -m edge_tts`）；四份副本各 5 個檔案，與專案來源的相對檔案清單及 SHA-256 完全一致，沒有額外檔案，且 `SKILL.md` 均無 UTF-8 BOM。
 
 - Claude Code：`~\.claude\skills\speak`
 - Codex：`~\.agents\skills\speak`
