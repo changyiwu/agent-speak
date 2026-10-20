@@ -1,4 +1,4 @@
-# agent-speak-skill 🔊
+# agent-speak 🔊
 
 讓你的 AI Agent「用語音回答你」——使用 Edge-TTS 的串流語音回覆技能。
 
@@ -74,7 +74,7 @@ Edge-TTS 不能用 SSML 指定讀音，多音字與英文詞念錯只能改字�
 | GPT-4 | `GPT four` | 英文型號用英文念 |
 ```
 
-只讀表頭是「原文｜改寫」的表格；內容有 `|` 寫成 `\|`，反引號包住的格子會去掉反引號（用來標出前後空白）；長的原文先換，一次掃完不重複替換。技能**自帶一份** `speak/tts-lexicon.md`，安裝時跟著複製，單獨使用就有完整條目。這份表在 [agent-video-specs](https://github.com/changyiwu/agent-video-specs)、[ai-video-workflow](https://github.com/changyiwu/ai-video-workflow)、[voxcpm2-voice-cloner](https://github.com/changyiwu/voxcpm2-voice-cloner) 也各有一份、內容相同；找得到就一起讀，同一個原文以自帶那份為準。離線備援（SAPI／`say`）是別的引擎，照原文念。
+只讀表頭是「原文｜改寫」的表格；內容有 `|` 寫成 `\|`，反引號包住的格子會去掉反引號（用來標出前後空白）；長的原文先換，一次掃完不重複替換。技能**自帶一份** `speak/tts-lexicon.md`，安裝時跟著複製，單獨使用就有完整條目。這份表在 [media-video-specs](https://github.com/changyiwu/media-video-specs)、[media-short-film](https://github.com/changyiwu/media-short-film)、[media-voice-clone](https://github.com/changyiwu/media-voice-clone) 也各有一份、內容相同；找得到就一起讀，同一個原文以自帶那份為準。離線備援（SAPI／`say`）是別的引擎，照原文念。
 
 找表順序（遠的在前、近的覆蓋遠的；任何一份讀不到都跳過，全部找不到就照原文念）：
 

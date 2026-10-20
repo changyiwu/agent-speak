@@ -3,7 +3,7 @@
 
 Edge-TTS 不能用 SSML 指定讀音，只能改字。表是 Markdown（| 原文 | 改寫 | 說明 |），
 本技能自帶一份 tts-lexicon.md（跟本檔放在一起，裝成全域技能時一起複製）。這份表有四份、內容完全相同，
-另外三份在 agent-video-specs、ai-video-workflow、voxcpm2-voice-cloner 的根目錄；找得到就一起讀（合併），
+另外三份在 media-video-specs、media-short-film、media-voice-clone 的根目錄；找得到就一起讀（合併），
 同一個原文以近的為準。任何一份讀不到或壞掉都跳過，全部找不到就照原文念，不報錯、不拖慢。
 
 找表的順序（遠的在前、近的覆蓋遠的）：
@@ -26,7 +26,7 @@ NAME = "tts-lexicon.md"
 HEAD = ("原文", "改寫")
 DRIVES = ("我的雲端硬碟", "My Drive")
 # 同內容的另外三份（repo 名稱）；表都在 repo 根目錄
-SIBLINGS = ("agent-video-specs", "ai-video-workflow", "voxcpm2-voice-cloner")
+SIBLINGS = ("media-video-specs", "media-short-film", "media-voice-clone")
 
 
 def debug(msg):

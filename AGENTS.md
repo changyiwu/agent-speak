@@ -1,4 +1,4 @@
-# agent-speak-skill（專案藍圖）
+# agent-speak（專案藍圖）
 
 > 本檔為跨 Agent 通用的專案藍圖（AGENTS.md 開放標準）。任何 Agent 的每個 session 都應先讀本檔＋`handoff.md`。
 > Claude Code 預設只在沒有 `CLAUDE.md` 時才讀 `AGENTS.md`，故由 `CLAUDE.md` 的 `@AGENTS.md` import 本檔（`CLAUDE.md` 只有這一行）；Claude 專屬規範寫在本檔〈Claude Code 專屬〉一節。
@@ -18,12 +18,12 @@
 - [x] 階段三：完成 GitHub 與 Obsidian 初始化
 - [x] 階段四：同步到四個 Agent 全域技能目錄，並完成逐檔 SHA-256、額外檔案與 UTF-8 BOM 驗證
 - [x] 階段五：在 `SKILL.md` 明訂 PowerShell 7 為硬需求，並補齊當前電腦的本機語音依賴
-- [ ] 階段六：其餘電腦補齊語音依賴並跑 `-Check`，再各自跑 `sync-skills` 取得新版 `SKILL.md`
+- [ ] 階段六：其餘電腦補齊語音依賴並跑 `-Check`，再各自跑 `skill-sync` 取得新版 `SKILL.md`
 
 ## 資料夾結構
 
 ```text
-agent-speak-skill/
+agent-speak/
 ├── speak/                 # 可安裝的 Skill 來源目錄
 │   ├── agents/            # Codex UI metadata
 │   ├── SKILL.md           # 觸發條件與 Agent 執行流程
@@ -46,8 +46,8 @@ agent-speak-skill/
 | 層級 | 平台 | 位置 | 讀取時機 |
 |------|------|------|---------|
 | L1 | 本地（GDrive） | `AGENTS.md`＋`handoff.md`＋`CLAUDE.md`（橋接） | 每個 session |
-| L2 | GitHub | [changyiwu/agent-speak-skill](https://github.com/changyiwu/agent-speak-skill)（公開） | 指定時 |
-| L3 | Obsidian | `agent-speak-skill/專案工作流程.md` | 有需要時 |
+| L2 | GitHub | [changyiwu/agent-speak](https://github.com/changyiwu/agent-speak)（公開） | 指定時 |
+| L3 | Obsidian | `agent-speak/專案工作流程.md` | 有需要時 |
 
 ## 三個檔案的職責（依「時效性」分家，不是依「詳細程度」）
 
@@ -74,7 +74,7 @@ agent-speak-skill/
 - **`speak.ps1` 必須用 `pwsh` 執行**。它是 UTF-8 無 BOM，Windows PowerShell 5.1 會以 ANSI 解讀，中文變亂碼、引號被吃掉，在 **parse 階段就失敗**（`Unexpected token ')'`、`The string is missing the terminator`），連 `-Check` 都跑不到。**看到這種語法錯誤是用錯直譯器，不是腳本壞掉**
 - **`pwsh` 可能是 winget 的 MSIX 版**，解析到 `AppData\Local\Microsoft\WindowsApps\pwsh.exe`，`C:\Program Files\PowerShell` 並不存在。一般沙箱看不到 `WindowsApps`，會**誤報 pwsh 未安裝**——那是假性缺少，不要重裝，實體在 `C:\Program Files\WindowsApps\Microsoft.PowerShell_*`
 - **不要把使用者提供的講稿直接插入 shell 命令字串**，一律寫成 UTF-8 暫存文字檔再用 `-File` 傳入
-- **讀音替換表自帶一份**：`speak/tts-lexicon.md`，跟技能一起安裝。這份表有**四份、內容逐位元組相同**（另外三份在 agent-video-specs、ai-video-workflow、voxcpm2-voice-cloner 的根目錄；四個 repo 都公開，各自單獨下載就要能用），**改表時四份一起改**，用 `python ai-video-workflow/tools/tts_lexicon.py --check`／`--sync` 檢查與合併。`tts_lexicon.py` 會把找得到的另外三份一起讀（自帶那份優先）；不要 import 別的 repo 的程式，解析規則要跟表頭寫的一致。任何一份讀不到或壞掉都跳過，全部找不到必須安靜地照原文念（2026-10-20 前曾規定本技能不內建條目、只讀 ai-video-workflow 那份，結果單獨安裝的人完全沒有替換，已廢止）
+- **讀音替換表自帶一份**：`speak/tts-lexicon.md`，跟技能一起安裝。這份表有**四份、內容逐位元組相同**（另外三份在 media-video-specs、media-short-film、media-voice-clone 的根目錄；四個 repo 都公開，各自單獨下載就要能用），**改表時四份一起改**，用 `python media-short-film/tools/tts_lexicon.py --check`／`--sync` 檢查與合併。`tts_lexicon.py` 會把找得到的另外三份一起讀（自帶那份優先）；不要 import 別的 repo 的程式，解析規則要跟表頭寫的一致。任何一份讀不到或壞掉都跳過，全部找不到必須安靜地照原文念（2026-10-20 前曾規定本技能不內建條目、只讀 media-short-film 那份，結果單獨安裝的人完全沒有替換，已廢止）
 - **呼叫 Edge-TTS 一律用 `python -m edge_tts`，不要直接跑 pip 產生的 `edge-tts.exe`**：它沒有簽章，Windows 智慧型應用程式控制開啟時會被封鎖（錯誤碼 4551），pwsh 7.6 擷取輸出時還會誤報成 `StandardOutputEncoding is only supported when standard output is redirected`——看到這個錯誤是被封鎖，不是編碼問題
 - winget 裝完會改 PATH，**同一個 shell session 要重新載入環境變數**才找得到 `pwsh`／`ffplay`
 
@@ -87,4 +87,4 @@ agent-speak-skill/
 - OpenCode：`~\.config\opencode\skills\speak`
 - Antigravity：`~\.gemini\config\skills\speak`
 
-四個安裝目錄與本機語音依賴**都不跨電腦同步**，每台要各自安裝依賴並跑 `sync-skills`。**哪台裝到什麼程度、副本是哪一版，記在 `handoff.md`**（本機檔，不進 repo）。跨機安裝清單在 `我的雲端硬碟\agents\.skill-install\<電腦名>.json`，同樣不在 repo 內。
+四個安裝目錄與本機語音依賴**都不跨電腦同步**，每台要各自安裝依賴並跑 `skill-sync`。**哪台裝到什麼程度、副本是哪一版，記在 `handoff.md`**（本機檔，不進 repo）。跨機安裝清單在 `我的雲端硬碟\agents\.skill-install\<電腦名>.json`，同樣不在 repo 內。

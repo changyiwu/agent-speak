@@ -1,6 +1,6 @@
 ---
 name: speak
-description: 快速語音回覆技能。當使用者說「唸出來」「用語音回答」「用語音講結論」「唸給我聽」「語音摘要」，或以語音對話並希望得到語音回覆時，請一定要使用此技能。使用 Edge-TTS 生成台灣中文語音並在本機無視窗播放。只有使用者明確指定「用小吳（或其他已克隆人聲）的聲音」時，才在 voice-cloner 技能可用的情況下改用該技能；否則使用本技能。
+description: 快速語音回覆技能。當使用者說「唸出來」「用語音回答」「用語音講結論」「唸給我聽」「語音摘要」，或以語音對話並希望得到語音回覆時，請一定要使用此技能。使用 Edge-TTS 生成台灣中文語音並在本機無視窗播放。只有使用者明確指定「用小吳（或其他已克隆人聲）的聲音」時，才在 voice-clone 技能可用的情況下改用該技能；否則使用本技能。
 ---
 
 # speak — 快速語音回覆
@@ -16,7 +16,7 @@ description: 快速語音回覆技能。當使用者說「唸出來」「用語�
 | 1. 串流 | Edge-TTS ＋ ffplay/mpv | 相同 |
 | 2. 整檔播放 | MediaPlayer → WMPlayer COM | `afplay`（系統內建） |
 | 3. 離線備援 | SAPI | `say`（系統內建；嗓音優先序 Meijia → Sinji → Tingting） |
-- 小吳或其他已克隆人聲**只在使用者明確指名且 `voice-cloner` 可用時**改走該技能；不可用時要先說明
+- 小吳或其他已克隆人聲**只在使用者明確指名且 `voice-clone` 可用時**改走該技能；不可用時要先說明
 
 ## 環境需求
 
@@ -35,7 +35,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File "<本技能資料夾>/speak.ps1" -
 
 Edge-TTS 不能用 SSML 指定讀音，念錯只能改字。串流與整檔兩層送進 Edge-TTS 前，會先套共用的讀音替換表 `tts-lexicon.md`（例：奇數 → 基數、十一少一 → 十一少了一、GPT-4 → GPT four）；講稿照正確用字寫，不必自己改字。第 3 層離線備援是別的引擎，照原文念。
 
-本技能**自帶一份**表（`tts-lexicon.md`，跟本檔放在一起），單獨使用就有完整條目；同一份表在 agent-video-specs、ai-video-workflow、voxcpm2-voice-cloner 也各有一份，找得到就一起讀（自帶那份優先）。任何一份讀不到都跳過，全部找不到就照原文念，不報錯、不拖慢。
+本技能**自帶一份**表（`tts-lexicon.md`，跟本檔放在一起），單獨使用就有完整條目；同一份表在 media-video-specs、media-short-film、media-voice-clone 也各有一份，找得到就一起讀（自帶那份優先）。任何一份讀不到都跳過，全部找不到就照原文念，不報錯、不拖慢。
 
 找另外三份的地方：從本技能資料夾往上每一層的 `<repo>/tts-lexicon.md`，再看家目錄底下的雲端硬碟（`~/我的雲端硬碟`、`~/My Drive`、`~/Google Drive/(我的雲端硬碟|My Drive)`、macOS 的 `~/Library/CloudStorage/GoogleDrive-*/(我的雲端硬碟|My Drive)`）的 `agents/<repo>/tts-lexicon.md`。設了環境變數 `TTS_LEXICON` 時，改讀它指的表來取代自帶那份。
 
@@ -71,6 +71,6 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File "<本技能資料夾>/speak.ps1" -
 一句話帶過即可（模式、首個音訊 chunk 延遲、音檔位置若有存）。不要重複唸稿內容。
 
 ## 注意
-- 使用者句子含「小吳的聲音」「用○○的聲音」→ `voice-cloner` 可用時改用該技能；不可用時告知使用者
+- 使用者句子含「小吳的聲音」「用○○的聲音」→ `voice-clone` 可用時改用該技能；不可用時告知使用者
 - Edge-TTS 需要網路；離線時自動退到作業系統內建語音（Windows SAPI／macOS `say`，機器感較重但可離線使用）
 - 不要用 `Start-Process` 播放——會開外部程式視窗，使用者明確不要
