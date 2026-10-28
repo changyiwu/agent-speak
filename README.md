@@ -21,7 +21,7 @@ Voice-reply skill for AI agents (Claude Code / Codex / OpenCode / Antigravity) �
 | Windows 10/11 | 播放備援用到 WPF／SAPI（核心生成跨平台，播放層目前為 Windows） |
 | PowerShell 7（pwsh） | `winget install Microsoft.PowerShell` |
 | Python 3.8+ ＋ edge-tts | `pip install edge-tts`（串流與整檔都直接跑 Python 模組，不靠 `edge-tts.exe`） |
-| ffmpeg（含 ffplay）或 mpv | 串流播放用；沒有也能動（自動退到整檔模式）。`winget install Gyan.FFmpeg` |
+| ffmpeg（含 ffplay）或 mpv | 串流播放用；沒有也能動（自動退到整檔模式）。Win x64: `winget install Gyan.FFmpeg`；Win ARM64: 先試 `winget install BtbN.FFmpeg.GPL.9.0 --architecture arm64`，`ffmpeg -version` 被 Smart App Control 擋就改裝 `Gyan.FFmpeg` |
 
 PowerShell 7 是啟動本 Skill 的必要條件；Windows SAPI 只負責執行後的離線語音備援，不能取代 `pwsh`。
 命令使用單次行程的 `-ExecutionPolicy Bypass`，只略過這次 Skill 腳本的簽章限制，不修改使用者或系統的全域執行政策。
