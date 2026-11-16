@@ -74,14 +74,14 @@ Edge-TTS 不能用 SSML 指定讀音，多音字與英文詞念錯只能改字�
 | GPT-4 | `GPT four` | 英文型號用英文念 |
 ```
 
-只讀表頭是「原文｜改寫」的表格；內容有 `|` 寫成 `\|`，反引號包住的格子會去掉反引號（用來標出前後空白）；長的原文先換，一次掃完不重複替換。技能**自帶一份** `speak/tts-lexicon.md`，安裝時跟著複製，單獨使用就有完整條目。這份表在 [media-video-specs](https://github.com/changyiwu/media-video-specs)、[media-short-film](https://github.com/changyiwu/media-short-film)、[media-voice-clone](https://github.com/changyiwu/media-voice-clone) 也各有一份、內容相同；找得到就一起讀，同一個原文以自帶那份為準。離線備援（SAPI／`say`）是別的引擎，照原文念。
+只讀表頭是「原文｜改寫」的表格；內容有 `|` 寫成 `\|`，反引號包住的格子會去掉反引號（用來標出前後空白）；長的原文先換，一次掃完不重複替換。技能**自帶一份** `speak/tts-lexicon.md`，安裝時跟著複製，單獨使用就有完整條目。這份表在 [media-video-specs](https://github.com/changyiwu/media-video-specs)、[media-short-film](https://github.com/changyiwu/media-short-film)、[media-voice-clone](https://github.com/changyiwu/media-voice-clone)、[media-math-rap](https://github.com/changyiwu/media-math-rap) 也各有一份、內容相同；找得到就一起讀，同一個原文以自帶那份為準。離線備援（SAPI／`say`）是別的引擎，照原文念。
 
 找表順序（遠的在前、近的覆蓋遠的；任何一份讀不到都跳過，全部找不到就照原文念）：
 
-1. 另外三份：從技能資料夾往上，每一層找 `<repo>/tts-lexicon.md`（從 repo 執行時適用）；找不到再看家目錄底下的雲端硬碟：`~/我的雲端硬碟`、`~/My Drive`、`~/Google Drive/(我的雲端硬碟|My Drive)`、macOS 的 `~/Library/CloudStorage/GoogleDrive-*/(我的雲端硬碟|My Drive)`，底下的 `agents/<repo>/tts-lexicon.md`
+1. 另外四份：從技能資料夾往上，每一層找 `<repo>/tts-lexicon.md`（從 repo 執行時適用）；找不到再看家目錄底下的雲端硬碟：`~/我的雲端硬碟`、`~/My Drive`、`~/Google Drive/(我的雲端硬碟|My Drive)`、macOS 的 `~/Library/CloudStorage/GoogleDrive-*/(我的雲端硬碟|My Drive)`，底下的 `agents/<repo>/tts-lexicon.md`
 2. 自帶的 `speak/tts-lexicon.md`（設了環境變數 `TTS_LEXICON` 就改讀它指的表）
 
-技能平常從全域技能目錄執行，自帶那份一定讀得到；另外三份只是補充。確認用了哪幾份表：
+技能平常從全域技能目錄執行，自帶那份一定讀得到；另外四份只是補充。確認用了哪幾份表：
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File ./speak/speak.ps1 -Check   # 看 LEXICON= 一行

@@ -115,7 +115,7 @@ class LexiconTests(unittest.TestCase):
             self.assertIsNone(tts_lexicon.find(skill, self.root / "home"))
 
     def test_google_drive_default_under_home(self) -> None:
-        # 裝成全域技能時往上找不到，靠雲端硬碟位置找另外三份
+        # 裝成全域技能時往上找不到，靠雲端硬碟位置找另外四份
         home = self.root / "home"
         skill = home / ".claude" / "skills" / "speak"
         own = write(skill / "tts-lexicon.md")
