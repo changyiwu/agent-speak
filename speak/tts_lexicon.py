@@ -2,12 +2,12 @@
 """讀音替換表：送進 Edge-TTS 前把念錯的詞換成念得對的寫法（多音字、英文詞）。
 
 Edge-TTS 不能用 SSML 指定讀音，只能改字。表是 Markdown（| 原文 | 改寫 | 說明 |），
-本技能自帶一份 tts-lexicon.md（跟本檔放在一起，裝成全域技能時一起複製）。這份表有五份、內容完全相同，
-另外四份在 media-video-specs、media-short-film、media-voice-clone、media-math-rap 的根目錄；找得到就一起讀（合併），
+本技能自帶一份 tts-lexicon.md（跟本檔放在一起，裝成全域技能時一起複製）。這份表有六份、內容完全相同，
+另外五份在 media-video-specs、media-short-film、media-voice-clone、media-math-rap、media-music-video 的根目錄；找得到就一起讀（合併），
 同一個原文以近的為準。任何一份讀不到或壞掉都跳過，全部找不到就照原文念，不報錯、不拖慢。
 
 找表的順序（遠的在前、近的覆蓋遠的）：
-  1. 另外四份：從本技能資料夾往上，每一層找 <repo>/tts-lexicon.md（從 repo 原始檔執行時找得到）；
+  1. 另外五份：從本技能資料夾往上，每一層找 <repo>/tts-lexicon.md（從 repo 原始檔執行時找得到）；
      找不到再看常見的雲端硬碟位置（家目錄底下，不寫死磁碟代號；裝成全域技能時靠這個）：
        ~/我的雲端硬碟、~/My Drive、~/Google Drive/(我的雲端硬碟|My Drive)、
        macOS 的 ~/Library/CloudStorage/GoogleDrive-*/(我的雲端硬碟|My Drive)
@@ -25,8 +25,8 @@ import sys
 NAME = "tts-lexicon.md"
 HEAD = ("原文", "改寫")
 DRIVES = ("我的雲端硬碟", "My Drive")
-# 同內容的另外四份（repo 名稱）；表都在 repo 根目錄
-SIBLINGS = ("media-video-specs", "media-short-film", "media-voice-clone", "media-math-rap")
+# 同內容的另外五份（repo 名稱）；表都在 repo 根目錄
+SIBLINGS = ("media-video-specs", "media-short-film", "media-voice-clone", "media-math-rap", "media-music-video")
 
 
 def debug(msg):

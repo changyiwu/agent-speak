@@ -2,9 +2,9 @@
 
 送進 TTS（或歌曲模型）之前，把「原文」換成念得對的「改寫」。只改送進模型的文字，字幕、劇本、畫面上的字照常寫正確用字。
 
-## 這份表有五份，內容完全相同
+## 這份表有六份，內容完全相同
 
-下面五個 repo 各帶一份。五個都是公開的，不能假設使用者每個都下載，所以**每份都要完整、單獨可用**：
+下面六個 repo 各帶一份。六個都是公開的，不能假設使用者每個都下載，所以**每份都要完整、單獨可用**：
 
 | repo | 位置 | 用在 |
 |------|------|------|
@@ -13,9 +13,10 @@
 | [media-voice-clone](https://github.com/changyiwu/media-voice-clone) | 根目錄 | `tts_lexicon.py`：`clone.py`、`dialogue.py`（VoxCPM2 克隆） |
 | [agent-speak](https://github.com/changyiwu/agent-speak) | `speak/` | speak 技能（Edge-TTS 語音回覆；裝成全域技能時跟著複製） |
 | [media-math-rap](https://github.com/changyiwu/media-math-rap) | 根目錄 | `scripts/tts_lexicon.py`：`mrv.py lyrics` 產生送唱版歌詞（ACE-Step、Suno 等歌曲模型唱、強制對齊用） |
+| [media-music-video](https://github.com/changyiwu/media-music-video) | 根目錄 | `tools/mv/tts_lexicon.py`：`suno_prep.py` 產生送唱版歌詞（Suno／Music 3 等歌曲模型唱、強制對齊用） |
 
-- **改表時五份一起改**，內容維持逐位元組相同。五個 repo 放在同一層時，用 `python media-short-film/tools/tts_lexicon.py --check` 檢查五份是否一致，`--sync` 把各份的條目合併後寫回五份。
-- 五個 repo 放在同一層時，每個程式都會把找得到的其他份一起讀（合併），同一個原文以自己那份為準。所以本機漏同步時自己出片察覺不到，但只下載其中一個 repo 的人就會缺那條。
+- **改表時六份一起改**，內容維持逐位元組相同。六個 repo 放在同一層時，用 `python media-short-film/tools/tts_lexicon.py --check` 檢查六份是否一致，`--sync` 把各份的條目合併後寫回六份。
+- 六個 repo 放在同一層時，每個程式都會把找得到的其他份一起讀（合併），同一個原文以自己那份為準。所以本機漏同步時自己出片察覺不到，但只下載其中一個 repo 的人就會缺那條。
 
 ## 規則
 
@@ -23,10 +24,10 @@
 - 每列一條：`| 原文 | 改寫 | 說明 |`。說明寫正確讀音、出處（哪個 repo、哪支片、哪個引擎）、是否已人耳確認。
 - 長的原文先換；同一段文字只換一次，換過的結果不會再被其他條目換。
 - 改寫盡量用**同音字**或**補字**（奇數 → 基數、十一少一 → 十一少了一），不要換成意思不同、字數差很多的說法：media-short-film 挑音會拿改寫後的文字比對聽寫。條目寫得越具體越安全，避免誤換其他詞。
-- 只有某個引擎會念錯的條目，五份照樣都加，說明欄註明引擎（同音字換給別的引擎念通常也對）。
+- 只有某個引擎會念錯的條目，六份照樣都加，說明欄註明引擎（同音字換給別的引擎念通常也對）。
 - 內容有 `|` 時寫成 `\|`；要讓前後空白看得出來，可以用反引號包起來（`` `GPT four` ``）。
 - 只對某支片生效的條目，在那支片的資料夾放一份同名的 `tts-lexicon.md`（同樣的表格格式），同一個原文以近的為準。
-- 找表順序（近的覆蓋遠的）：同層其他四個 repo 的表 → 自己這份（設了環境變數 `TTS_LEXICON` 就改讀它指的表）→ 工作資料夾往上每一層的同名檔。
+- 找表順序（近的覆蓋遠的）：同層其他五個 repo 的表 → 自己這份（設了環境變數 `TTS_LEXICON` 就改讀它指的表）→ 工作資料夾往上每一層的同名檔。
 - 新增條目後要重生那幾句並實際聽過：改字會改變旁白長度與逐詞時間。media-video-specs 照 GOTCHAS H-4／H-5 處理；media-short-film 已挑好的句子不會自動重挑，要刪掉該片 `work/voice/bv` 裡那句的候選再跑 `voices`。
 
 ## 替換表

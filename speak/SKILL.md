@@ -35,11 +35,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File "<本技能資料夾>/speak.ps1" -
 
 Edge-TTS 不能用 SSML 指定讀音，念錯只能改字。串流與整檔兩層送進 Edge-TTS 前，會先套共用的讀音替換表 `tts-lexicon.md`（例：奇數 → 基數、十一少一 → 十一少了一、GPT-4 → GPT four）；講稿照正確用字寫，不必自己改字。第 3 層離線備援是別的引擎，照原文念。
 
-本技能**自帶一份**表（`tts-lexicon.md`，跟本檔放在一起），單獨使用就有完整條目；同一份表在 media-video-specs、media-short-film、media-voice-clone、media-math-rap 也各有一份，找得到就一起讀（自帶那份優先）。任何一份讀不到都跳過，全部找不到就照原文念，不報錯、不拖慢。
+本技能**自帶一份**表（`tts-lexicon.md`，跟本檔放在一起），單獨使用就有完整條目；同一份表在 media-video-specs、media-short-film、media-voice-clone、media-math-rap、media-music-video 也各有一份，找得到就一起讀（自帶那份優先）。任何一份讀不到都跳過，全部找不到就照原文念，不報錯、不拖慢。
 
-找另外四份的地方：從本技能資料夾往上每一層的 `<repo>/tts-lexicon.md`，再看家目錄底下的雲端硬碟（`~/我的雲端硬碟`、`~/My Drive`、`~/Google Drive/(我的雲端硬碟|My Drive)`、macOS 的 `~/Library/CloudStorage/GoogleDrive-*/(我的雲端硬碟|My Drive)`）的 `agents/<repo>/tts-lexicon.md`。設了環境變數 `TTS_LEXICON` 時，改讀它指的表來取代自帶那份。
+找另外五份的地方：從本技能資料夾往上每一層的 `<repo>/tts-lexicon.md`，再看家目錄底下的雲端硬碟（`~/我的雲端硬碟`、`~/My Drive`、`~/Google Drive/(我的雲端硬碟|My Drive)`、macOS 的 `~/Library/CloudStorage/GoogleDrive-*/(我的雲端硬碟|My Drive)`）的 `agents/<repo>/tts-lexicon.md`。設了環境變數 `TTS_LEXICON` 時，改讀它指的表來取代自帶那份。
 
-`-Check` 的 `LEXICON=` 一行會顯示最近的那份表與合併後的條數（`none`＝一份都沒找到）；設 `SPEAK_DEBUG=1` 時串流播放的結果也會帶出用了哪幾份表。要新增讀音，五份一起改（見表的開頭），不要只改本技能這份。
+`-Check` 的 `LEXICON=` 一行會顯示最近的那份表與合併後的條數（`none`＝一份都沒找到）；設 `SPEAK_DEBUG=1` 時串流播放的結果也會帶出用了哪幾份表。要新增讀音，六份一起改（見表的開頭），不要只改本技能這份。
 
 ## 執行步驟
 
